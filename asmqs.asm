@@ -1,6 +1,6 @@
 section .data
-    array db 1, 2, 3, 4, 5, 6, 7, 11, 15, 18
-    len equ $ - array
+    array dd 1, 2, 3, 4, 5, 6, 7, 11, 15, 18
+    len equ 10
     fmt db "%d", 10, 0
 
 section .text
@@ -20,7 +20,7 @@ _main:
     xor rax, rax
     call _printf
 
-    inc rbx                   ; move to next element
+    add rbx, 4                ; move to next element
     inc rbp                   ; increment printed counter
     jmp .next
 
