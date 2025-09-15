@@ -1,31 +1,34 @@
 section .data
-    array dd 1, 2, 3, 4, 5, 6, 7, 11, 15, 18
-    len equ 10
-    fmt db "%d", 10, 0
+    arr dd 1, 2, 3, 4, 5, 6
+    len equ 6
+    fmt db "%d",10,0
 
 section .text
     global _main
     extern _printf
+    extern _exit
 
 _main:
-    lea rbx, [rel array]      ; pointer to first element
-    mov rbp, 0                ; counter for printed elements
+    sub rsp, len*4 + 8        ; allocate space on stack
+    lea rsi, [rel arr]        ; source of array
+    lea rdi, [rsp]            ; destination on stack
+    mov rcx, len              ; number of dwords to copy
+    rep movsd                 ; copy 10 dwords
+    xor rbp, rbp              ; index counter
 
-.next:
-    cmp rbp, len              ; check if we printed 5 elements
-    je .done                  ; stop when value is 5
-
-    movzx rsi, byte [rbx]     ; load next element
-    lea rdi, [rel fmt]        ; format string
-    xor rax, rax
+.print_loop:
+    cmp rbp, len
+    je .done
+    mov eax, [rsp + rbp*4]   ; read element from cloned array
+    mov esi, eax             ; first integer argument for _printf
+    lea rdi, [rel fmt]       ; format string
+    xor rax, rax             ; required for variadic functions
     call _printf
-
-    add rbx, 4                ; move to next element
-    inc rbp                   ; increment printed counter
-    jmp .next
+    inc rbp
+    jmp .print_loop
 
 .done:
-    mov rax, 0x2000001        ; syscall exit
-    xor rdi, rdi
-    syscall
+    add rsp, len*4 + 8       ; free stack
+    mov rdi, 0               ; exit code 0
+    call _exit
 
