@@ -3,7 +3,6 @@ section .data
   len1 equ ($ - arr1)/4
   dmsg db "%d ", 0
   nlmsg db "", 10, 0
-  smsg db "Sum: %d", 10, 0
   tmsg db "Elapsed cycles: %llu", 10, 0
 
 section .bss
