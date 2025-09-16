@@ -168,8 +168,8 @@ _main:
   mov rsi, len1
   call is_sorted
 
-  cmp r13b, 1
-  je .badsort
+  cmp r13b, 0
+  jne .badsort
 
   lea rdi, [rel arr1]
   lea rsi, [rel sum2]
