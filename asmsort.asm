@@ -18,6 +18,33 @@ section .text
 
 ; rdi points to array
 ; rsi length
+; r13b return byte
+is_sorted:
+  xor r12, r12
+  mov r13, rdi
+  mov r14, rsi
+  dec r14
+
+.issl:
+  cmp r12, r14
+  jge .isst
+  mov eax, [r13 + r12*4]
+  mov ecx, [r13 + r12*4 + 4]
+  cmp eax, ecx
+  jg .issf
+  inc r12
+  jmp .issl
+
+.issf:
+  mov r13b, 1
+  ret
+
+.isst:
+  mov r13b, 0
+  ret
+
+; rdi points to array
+; rsi length
 sort:
   xor r12, r12
   mov r14, rsi
@@ -115,7 +142,7 @@ time:
 
 ; rdi points to time1
 ; rsi points to time2
-tdout:
+time_diff_out:
   mov rax, [rsi]
   sub rax, [rdi]
   mov rsi, rax
@@ -138,26 +165,40 @@ _main:
   call sort
 
   lea rdi, [rel arr1]
+  mov rsi, len1
+  call is_sorted
+
+  cmp r13b, 1
+  je .badsort
+
+  lea rdi, [rel arr1]
   lea rsi, [rel sum2]
   mov rdx, len1
   call sum
+
+  mov eax, [rel sum1]
+  cmp eax, [rel sum2]
+  jne .badsum
 
   lea rdi, [rel time2]
   call time
 
   lea rdi, [rel time1]
   lea rsi, [rel time2]
-  call tdout
+  call time_diff_out
 
   lea rdi, [rel arr1]
   mov rsi, len1
   call arrout
 
-  mov eax, [rel sum1]
-  cmp eax, [rel sum2]
-  je .done
+  jmp .done
 
+.badsum:
   mov rdi, 1
+  call _exit
+
+.badsort:
+  mov rdi, 2
   call _exit
 
 .done:
