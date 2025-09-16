@@ -1,6 +1,6 @@
 section .data
-  arr1 dd 1, 2, 3, 4, 5
-  arr2 dd 2, 3, 4, 5, 6, 7
+  arr1 dd 3, 2, 4, 1, 5
+  arr2 dd 1, 3, 2, 6, 5, 4 
   len1 equ 5
   len2 equ 6
   msg db "%d", 10, 0
@@ -8,13 +8,26 @@ section .data
 section .bss
   sum1 resd 1
   sum2 resd 1
+  sarr1 resd 5
+  sarr2 resd 6
 
 section .text
   global _main
   extern _printf
   extern _exit
 
+; rdi points to array
+; rsi points to sorted array
+; rdx length
 sort:
+  mov r12, rdi
+  mov r12, rdx
+
+.sort_innerl:
+
+.sort_outerl:
+
+.sortd:
   ret
 
 ; rdi points to array
@@ -22,7 +35,7 @@ sort:
 ; rdx length
 sum:
   xor eax, eax
-  mov r12, 0
+  xor r12, r12
   mov r13, rdx
   mov r14, rdi
 
@@ -49,7 +62,7 @@ sumout:
 ; rdi points to array
 ; rsi length
 arrout:
-  mov r12, 0
+  xor r12, r12
   mov r13, rsi
   mov r14, rdi
 
