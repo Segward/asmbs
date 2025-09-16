@@ -1,7 +1,9 @@
 section .data
   arr1 dd 3, 2, 4, 1, 5, 2, 4, 8, 2, 4, 6, 7, 3, 4, 6, 3, 2, 5, 7
   len1 equ ($ - arr1)/4
-  msg db "%d", 10, 0
+  dmsg db "%d ", 0
+  nlmsg db "", 10, 0
+  smsg db "Sum: %d", 10, 0
 
 section .bss
   sum1 resd 1
@@ -79,7 +81,7 @@ sum:
 ; rdi points to sum
 sumout:
   mov esi, [rdi]
-  lea rdi, [rel msg]
+  lea rdi, [rel smsg]
   xor rax, rax
   call _printf
   ret
@@ -95,23 +97,54 @@ arrout:
   cmp r12, r13
   jge .arroutd
   mov esi, [r14 + r12*4]
-  lea rdi, [rel msg]
+  lea rdi, [rel dmsg]
   xor rax, rax
   call _printf
   inc r12
   jmp .arroutl
 
 .arroutd:
+  lea rdi, [rel nlmsg]
+  xor rax, rax
+  call _printf
   ret
 
 _main:
+  lea rdi, [rel arr1]
+  lea rsi, [rel sum1]
+  mov rdx, len1
+  call sum
+
+  lea rdi, [rel sum1]
+  call sumout
+
+  lea rdi, [rel arr1]
+  mov rsi, len1
+  call arrout
+
   lea rdi, [rel arr1]
   mov rsi, len1
   call sort
  
   lea rdi, [rel arr1]
+  lea rsi, [rel sum2]
+  mov rdx, len1
+  call sum
+
+  lea rdi, [rel sum2]
+  call sumout
+
+  lea rdi, [rel arr1]
   mov rsi, len1
   call arrout
 
+  mov eax, [rel sum1]
+  cmp eax, [rel sum2]
+  je .done
+
+  mov rdi, 1
+  call _exit
+
+.done:
   xor rdi, rdi
   call _exit
