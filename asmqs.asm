@@ -1,65 +1,35 @@
 section .data
-  arr db 10, 20, 30, 40
-  msg db "Sum of array: %d", 10, 0
+  arr dd 1, 2, 3, 4, 5
+  msg db "%d", 10, 0
 
 section .bss
-  _sum resb 1
+  _sum resd 1
 
 section .text
   global _main
   extern _printf
   extern _exit
 
-sum_arr:
-  push rax
-  push rcx
-  push rbx
-  push rsi
-  push rdi
-
-  xor rax, rax
+sum:
   xor rcx, rcx
+  xor rdx, rdx
   lea rbx, [rel arr]
 
-.sum_loop:
-  cmp rcx, 4
-  jge .sum_done
-  mov bl, [rbx + rcx]
-  add al, bl
+.suml:
+  cmp rcx, 5
+  jge .sumd
+  mov rax, [rbx + rcx*4]
+  add rdx, rax
   inc rcx
-  jmp .sum_loop
+  jmp .suml
 
-.sum_done:
-  mov [rel _sum], al
-
-  pop rdi
-  pop rsi
-  pop rbx
-  pop rcx
-  pop rax
-
-  ret  
-
-out_sum:
-  push rsi
-  push rdi
-  push rax
-
-  movzx rsi, byte [rel _sum]
-  lea rdi, [rel msg]
-  xor rax, rax
-  call _printf
-
-  pop rax
-  pop rdi
-  pop rsi
-
+.sumd:
+  mov [rel _sum], rdx
   ret
 
-
 _main:
-  call sum_arr
-  call out_sum
+  call sum
 
-  mov rdi, 0
+  mov rax, [rel _sum]
+  mov rdi, rax
   call _exit
