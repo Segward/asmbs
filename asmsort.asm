@@ -17,66 +17,79 @@ section .text
 sort:
   ret
 
-; rbx points to array
+; rdi points to array
 ; rsi points to sum
-; r12 length
+; rdx length
 sum:
-  xor rbp, rbp
-  xor rdx, rdx
+  xor eax, eax
+  mov r12, 0
+  mov r13, rdx
+  mov r14, rdi
 
 .suml:
-  cmp rbp, r12
+  cmp r12, r13
   jge .sumd
-  mov eax, [rbx + rbp*4]
-  add edx, eax
-  inc rbp
+  mov ebx, [r14 + r12*4]
+  add eax, ebx
+  inc r12
   jmp .suml
 
 .sumd:
-  mov [rsi], edx
+  mov [rsi], eax
   ret
 
-; rsi points to sum
+; rdi points to sum
 sumout:
-  mov esi, dword [rsi]
+  mov esi, [rdi]
   lea rdi, [rel msg]
   xor rax, rax
   call _printf
   ret
 
-; rbx points to array
-; r12 length
+; rdi points to array
+; rsi length
 arrout:
-  xor rbp, rbp
-  xor rdx, rdx
+  mov r12, 0
+  mov r13, rsi
+  mov r14, rdi
 
 .arroutl:
-  cmp rbp, r12
+  cmp r12, r13
   jge .arroutd
-
-  mov esi, [rbx + rbp*4]
+  mov esi, [r14 + r12*4]
   lea rdi, [rel msg]
   xor rax, rax
   call _printf
-
-  inc rbp
+  inc r12
   jmp .arroutl
 
 .arroutd:
   ret
 
 _main:
+  lea rdi, [rel arr1]
   lea rsi, [rel sum1]
-  lea rbx, [rel arr1]
-  mov r12, len1
+  mov rdx, len1
   call sum
+
+  lea rdi, [rel sum1]
   call sumout
 
+  lea rdi, [rel arr1]
+  mov rsi, len1
+  call arrout
+
+  lea rdi, [rel arr2]
   lea rsi, [rel sum2]
-  lea rbx, [rel arr2]
-  mov r12, len2
+  mov rdx, len2
   call sum
+
+  lea rdi, [rel sum2]
   call sumout
+
+  lea rdi, [rel arr2]
+  mov rsi, len2
+  call arrout
 
   xor rdi, rdi
   call _exit
