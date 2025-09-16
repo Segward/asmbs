@@ -4,10 +4,13 @@ section .data
   dmsg db "%d ", 0
   nlmsg db "", 10, 0
   smsg db "Sum: %d", 10, 0
+  tmsg db "Elapsed cycles: %llu", 10, 0
 
 section .bss
   sum1 resd 1
   sum2 resd 1
+  time1 resq 1
+  time2 resq 1
 
 section .text
   global _main
@@ -78,14 +81,6 @@ sum:
   mov [rsi], eax
   ret
 
-; rdi points to sum
-sumout:
-  mov esi, [rdi]
-  lea rdi, [rel smsg]
-  xor rax, rax
-  call _printf
-  ret
-
 ; rdi points to array
 ; rsi length
 arrout:
@@ -109,30 +104,51 @@ arrout:
   call _printf
   ret
 
+; rdi points to time
+time:
+  xor rax, rax
+  cpuid
+  rdtsc
+  shl rdx, 32
+  or rax, rdx
+  mov [rdi], rax
+  ret
+
+; rdi points to time1
+; rsi points to time2
+tdout:
+  mov rax, [rsi]
+  sub rax, [rdi]
+  mov rsi, rax
+  lea rdi, [rel tmsg]
+  xor rax, rax
+  call _printf
+  ret
+
 _main:
+  lea rdi, [rel time1]
+  call time
+
   lea rdi, [rel arr1]
   lea rsi, [rel sum1]
   mov rdx, len1
   call sum
 
-  lea rdi, [rel sum1]
-  call sumout
-
-  lea rdi, [rel arr1]
-  mov rsi, len1
-  call arrout
-
   lea rdi, [rel arr1]
   mov rsi, len1
   call sort
- 
+
   lea rdi, [rel arr1]
   lea rsi, [rel sum2]
   mov rdx, len1
   call sum
 
-  lea rdi, [rel sum2]
-  call sumout
+  lea rdi, [rel time2]
+  call time
+
+  lea rdi, [rel time1]
+  lea rsi, [rel time2]
+  call tdout
 
   lea rdi, [rel arr1]
   mov rsi, len1
