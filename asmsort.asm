@@ -1,15 +1,11 @@
 section .data
-  arr1 dd 3, 2, 4, 1, 5
-  arr2 dd 1, 3, 2, 6, 5, 4 
-  len1 equ 5
-  len2 equ 6
+  arr1 dd 3, 2, 4, 1, 5, 2, 4, 8, 2, 4, 6, 7, 3, 4, 6, 3, 2, 5, 7
+  len1 equ ($ - arr1)/4
   msg db "%d", 10, 0
 
 section .bss
   sum1 resd 1
   sum2 resd 1
-  sarr1 resd 5
-  sarr2 resd 6
 
 section .text
   global _main
@@ -17,17 +13,46 @@ section .text
   extern _exit
 
 ; rdi points to array
-; rsi points to sorted array
-; rdx length
+; rsi length
 sort:
-  mov r12, rdi
-  mov r12, rdx
+  xor r12, r12
+  mov r14, rsi
+  mov r15, rdi
 
-.sort_innerl:
+.sort_outl:
+  cmp r12, r14
+  jge .done
+  mov rax, r12
+  xor r13, r13
+  mov r13, r12
+  inc r13
 
-.sort_outerl:
+.sort_innl:
+  cmp r13, r14
+  jge .sort_outd
+  mov edx, [r15 + r13*4]
+  mov ecx, [r15 + rax*4]
+  cmp edx, ecx
+  jge .no_update
+  mov  rax, r13
 
-.sortd:
+.no_update:
+  inc r13
+  jmp .sort_innl
+
+.sort_outd:
+  cmp rax, r12
+  je  .no_swap
+  mov ebx, [r15 + r12*4]
+  mov edx, [r15 + rax*4]
+  mov [r15 + r12*4], edx
+  mov [r15 + rax*4], ebx
+
+.no_swap:
+  inc r12
+  jmp .sort_outl
+
+.done:
   ret
 
 ; rdi points to array
@@ -81,27 +106,11 @@ arrout:
 
 _main:
   lea rdi, [rel arr1]
-  lea rsi, [rel sum1]
-  mov rdx, len1
-  call sum
-
-  lea rdi, [rel sum1]
-  call sumout
-
+  mov rsi, len1
+  call sort
+ 
   lea rdi, [rel arr1]
   mov rsi, len1
-  call arrout
-
-  lea rdi, [rel arr2]
-  lea rsi, [rel sum2]
-  mov rdx, len2
-  call sum
-
-  lea rdi, [rel sum2]
-  call sumout
-
-  lea rdi, [rel arr2]
-  mov rsi, len2
   call arrout
 
   xor rdi, rdi
